@@ -32,12 +32,6 @@ cd HyperSave
 ### Instalando dependências
 
 ```bash
-flutter pub get
-```
-
-ou
-
-```bash
 npm install
 ```
 
@@ -46,35 +40,17 @@ npm install
 ### Desenvolvimento
 
 ```bash
-flutter run
-```
-
-ou
-
-```bash
 npm run dev
-```
-
-### Produção
-
-```bash
-flutter build apk --release
 ```
 
 ## 📁 Estrutura do Projeto
 
 ```text
 HyperSave/
-├── lib/
-├── assets/
 ├── backend/
-├── docs/
+├── frontend/
 └── README.md
 ```
-
-## 📸 Screenshots
-
-Adicione imagens da aplicação aqui.
 
 ## 🔧 Configuração
 
