@@ -93,7 +93,7 @@ const handleDownload = () => {
   if (!url.value) return;
   
   loading.value = true;
-  const backendUrl = `http://localhost:3000/download?url=${encodeURIComponent(url.value)}&format=${format.value}`;
+  const backendUrl = `https://hypersaveapi-production.up.railway.app/download?url=${encodeURIComponent(url.value)}&format=${format.value}`;
   
   try {
     const link = document.createElement('a');
