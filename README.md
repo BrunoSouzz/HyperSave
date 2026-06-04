@@ -13,11 +13,10 @@ HyperSave é uma aplicação desenvolvida para facilitar o download e gerenciame
 
 ## 🛠 Tecnologias Utilizadas
 
-- Flutter
-- Dart
 - Node.js
 - Express
-- SQLite
+- Vue.js
+- Tailwindcss
 
 > Ajuste esta seção conforme seu projeto.
 
