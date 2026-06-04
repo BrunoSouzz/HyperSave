@@ -38,9 +38,13 @@ npm install
 ## ▶️ Executando o projeto
 
 ### Desenvolvimento
-
+# frontend
 ```bash
 npm run dev
+```
+# backend
+```bash
+node server.js
 ```
 
 ## 📁 Estrutura do Projeto
