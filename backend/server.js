@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const ytdlexec = require('youtube-dl-exec');
+const path = require('path');
+const ytdlexec = require('youtube-dl-exec').create('/usr/local/bin/yt-dlp');
 require('dotenv').config();
 
 const app = express();
@@ -9,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
+const COOKIES_PATH = path.join(__dirname, 'cookies.txt');
 
 function isValidYouTubeURL(url) {
     try {
@@ -22,6 +24,17 @@ function isValidYouTubeURL(url) {
     }
 }
 
+// 🔍 NOVA ROTA: Validação rápida para o Vue exibir o banner de erro na interface
+app.get('/validate', (req, res) => {
+    const { url } = req.query;
+
+    if (!url || !isValidYouTubeURL(url)) {
+        return res.json({ valid: false, error: 'A URL inserida não pertence a um vídeo válido do YouTube.' });
+    }
+
+    return res.json({ valid: true });
+});
+
 app.get('/download', async (req, res) => {
     const { url, format } = req.query;
 
@@ -30,11 +43,11 @@ app.get('/download', async (req, res) => {
     }
 
     try {
-        
         const info = await ytdlexec(url, {
             dumpSingleJson: true,
             noWarnings: true,
             noCheckCertificates: true,
+            cookies: COOKIES_PATH,
         });
 
         const safeTitle = info.title.replace(/[^\w\s-]/gi, '').trim();
@@ -48,6 +61,7 @@ app.get('/download', async (req, res) => {
                 audioFormat: 'mp3',
                 audioQuality: 0,
                 output: '-',
+                cookies: COOKIES_PATH,
             });
 
             subprocess.stdout.pipe(res);
@@ -70,6 +84,7 @@ app.get('/download', async (req, res) => {
             const subprocess = ytdlexec.exec(url, {
                 format: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 output: '-',
+                cookies: COOKIES_PATH,
             });
 
             subprocess.stdout.pipe(res);
