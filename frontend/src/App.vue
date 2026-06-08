@@ -13,6 +13,23 @@
         </p>
       </header>
 
+      <transition name="fade">
+        <div v-if="errorMessage" class="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3 text-sm text-red-400">
+          <span class="text-xl mt-0.5">⚠️</span>
+          <div class="flex-1">
+            <p class="font-bold text-red-300">Falha na verificação</p>
+            <p class="opacity-90 text-xs mt-0.5">{{ errorMessage }}</p>
+          </div>
+          <button 
+            type="button" 
+            @click="errorMessage = ''" 
+            class="text-red-400 hover:text-red-300 text-xs font-bold px-2 py-1 rounded bg-red-500/5 hover:bg-red-500/20 transition"
+          >
+            Dispensar
+          </button>
+        </div>
+      </transition>
+
       <form @submit.prevent="handleDownload" class="space-y-6">
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">URL da Mídia</label>
@@ -20,7 +37,12 @@
             v-model="url"
             type="text" 
             placeholder="https://www.youtube.com/watch?v=..." 
-            class="w-full px-4 py-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-neutral-100 placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
+            :class="[
+              'w-full px-4 py-3.5 bg-neutral-950 border rounded-xl text-neutral-100 placeholder-neutral-600 focus:outline-none focus:ring-2 transition-all duration-200',
+              errorMessage 
+                ? 'border-red-500/50 focus:ring-red-500/30 focus:border-red-500' 
+                : 'border-neutral-800 focus:ring-orange-500/50 focus:border-orange-500'
+            ]"
             :disabled="loading"
             required
           />
@@ -88,14 +110,31 @@ import { ref } from 'vue';
 const url = ref('');
 const format = ref('mp4');
 const loading = ref(false);
+const errorMessage = ref(''); // Novo estado para gerir mensagens de erro
 
-const handleDownload = () => {
+const handleDownload = async () => {
   if (!url.value) return;
   
   loading.value = true;
-  const backendUrl = `https://hypersaveapi-production.up.railway.app/download?url=${encodeURIComponent(url.value)}&format=${format.value}`;
-  
+  errorMessage.value = ''; // Limpa mensagens de erro anteriores
+
+  const apiBaseUrl = 'https://hypersaveapi-production.up.railway.app';
+
   try {
+    // 1. Faz um pedido rápido à nova rota do back-end para validar a URL
+    const validateResponse = await fetch(`${apiBaseUrl}/validate?url=${encodeURIComponent(url.value)}`);
+    const validation = await validateResponse.json();
+
+    // 2. Se a validação falhar, ativa o ecrã de erro e interrompe o processo
+    if (!validation.valid) {
+      errorMessage.value = validation.error || 'A URL informada não é aceita pelo sistema.';
+      loading.value = false;
+      return;
+    }
+
+    // 3. Se estiver tudo correto, prossegue para o download definitivo
+    const backendUrl = `${apiBaseUrl}/download?url=${encodeURIComponent(url.value)}&format=${format.value}`;
+    
     const link = document.createElement('a');
     link.href = backendUrl;
     link.setAttribute('download', ''); 
@@ -110,7 +149,7 @@ const handleDownload = () => {
 
   } catch (error) {
     loading.value = false;
-    alert('Erro ao conectar com o servidor do HYPERSAVE.');
+    errorMessage.value = 'Não foi possível estabelecer conexão com o servidor do HYPERSAVE.';
     console.error(error);
   }
 };
