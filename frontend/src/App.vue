@@ -147,7 +147,7 @@ const handleDownload = async () => {
 
     const link = document.createElement('a');
     link.href = objectUrl;
-    link.setAttribute('download', `hypersave.${format.value}`);
+    link.setAttribute('download', `${safeTitle}.${format.value}`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
