@@ -149,7 +149,7 @@ const handleDownload = async () => {
 
   } catch (error) {
     loading.value = false;
-    errorMessage.value = 'Não foi possível estabelecer conexão com o servidor do HYPERSAVE.';
+    errorMessage.value = 'Não foi possível estabelecer conexão com o servidor do HYPERSAVE ou Link inválido. Por favor insira um link válido e tente novamente.';
     console.error(error);
   }
 };
