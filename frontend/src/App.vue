@@ -110,46 +110,56 @@ import { ref } from 'vue';
 const url = ref('');
 const format = ref('mp4');
 const loading = ref(false);
-const errorMessage = ref(''); // Novo estado para gerir mensagens de erro
+const errorMessage = ref(''); 
 
 const handleDownload = async () => {
   if (!url.value) return;
   
   loading.value = true;
-  errorMessage.value = ''; // Limpa mensagens de erro anteriores
+  errorMessage.value = ''; 
 
   const apiBaseUrl = 'https://hypersaveapi-production.up.railway.app';
 
   try {
-    // 1. Faz um pedido rápido à nova rota do back-end para validar a URL
+    
     const validateResponse = await fetch(`${apiBaseUrl}/validate?url=${encodeURIComponent(url.value)}`);
     const validation = await validateResponse.json();
 
-    // 2. Se a validação falhar, ativa o ecrã de erro e interrompe o processo
     if (!validation.valid) {
       errorMessage.value = validation.error || 'A URL informada não é aceita pelo sistema.';
       loading.value = false;
       return;
     }
 
-    // 3. Se estiver tudo correto, prossegue para o download definitivo
     const backendUrl = `${apiBaseUrl}/download?url=${encodeURIComponent(url.value)}&format=${format.value}`;
-    
+
+    const downloadResponse = await fetch(backendUrl);
+
+    if (!downloadResponse.ok) {
+      const errData = await downloadResponse.json().catch(() => ({}));
+      errorMessage.value = errData.error || 'Erro ao processar o download. Tente novamente.';
+      loading.value = false;
+      return;
+    }
+
+    const blob = await downloadResponse.blob();
+    const objectUrl = URL.createObjectURL(blob);
+
     const link = document.createElement('a');
-    link.href = backendUrl;
-    link.setAttribute('download', ''); 
+    link.href = objectUrl;
+    link.setAttribute('download', `hypersave.${format.value}`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    setTimeout(() => {
-      loading.value = false;
-      url.value = ''; 
-    }, 4000);
+
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+
+    loading.value = false;
+    url.value = '';
 
   } catch (error) {
     loading.value = false;
-    errorMessage.value = 'Não foi possível estabelecer conexão com o servidor do HYPERSAVE ou Link inválido. Por favor insira um link válido e tente novamente.';
+    errorMessage.value = 'Não foi possível estabelecer conexão com o servidor do HYPERSAVE. Por favor, verifique sua conexão e tente novamente.';
     console.error(error);
   }
 };
