@@ -24,19 +24,35 @@ function isValidYouTubeURL(url) {
     }
 }
 
+// Decodifica a URL com segurança (caso venha encodada com encodeURIComponent)
+function safeDecodeURL(raw) {
+    try {
+        return decodeURIComponent(raw);
+    } catch {
+        return raw;
+    }
+}
+
 // 🔍 NOVA ROTA: Validação rápida para o Vue exibir o banner de erro na interface
 app.get('/validate', (req, res) => {
-    const { url } = req.query;
+    const url = safeDecodeURL(req.query.url);
+
+    console.log('[validate] URL recebida:', url);
 
     if (!url || !isValidYouTubeURL(url)) {
+        console.log('[validate] URL inválida ou não reconhecida como YouTube.');
         return res.json({ valid: false, error: 'A URL inserida não pertence a um vídeo válido do YouTube.' });
     }
 
+    console.log('[validate] URL válida ✅');
     return res.json({ valid: true });
 });
 
 app.get('/download', async (req, res) => {
-    const { url, format } = req.query;
+    const url = safeDecodeURL(req.query.url);
+    const { format } = req.query;
+
+    console.log('[download] URL recebida:', url);
 
     if (!url || !isValidYouTubeURL(url)) {
         return res.status(400).json({ error: 'URL inválida ou não informada.' });
