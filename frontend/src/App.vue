@@ -145,9 +145,17 @@ const handleDownload = async () => {
     const blob = await downloadResponse.blob();
     const objectUrl = URL.createObjectURL(blob);
 
+    
+    const disposition = downloadResponse.headers.get('Content-Disposition');
+    let fileName = `hypersave.${format.value}`; 
+    if (disposition) {
+      const match = disposition.match(/filename="(.+)"/);
+      if (match) fileName = match[1];
+    }
+
     const link = document.createElement('a');
     link.href = objectUrl;
-    link.setAttribute('download', `${safeTitle}.${format.value}`);
+    link.setAttribute('download', fileName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
