@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const ytdlexec = require('youtube-dl-exec').create('/usr/local/bin/yt-dlp');
 require('dotenv').config();
 
@@ -11,6 +12,8 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 const COOKIES_PATH = path.join(__dirname, 'cookies.txt');
+
+// ─── Utilitários ────────────────────────────────────────────────────────────
 
 function isValidYouTubeURL(url) {
     try {
@@ -24,7 +27,6 @@ function isValidYouTubeURL(url) {
     }
 }
 
-// Decodifica a URL com segurança (caso venha encodada com encodeURIComponent)
 function safeDecodeURL(raw) {
     try {
         return decodeURIComponent(raw);
@@ -33,7 +35,20 @@ function safeDecodeURL(raw) {
     }
 }
 
-// 🔍 NOVA ROTA: Validação rápida para o Vue exibir o banner de erro na interface
+// Delay aleatório entre 2-5s para evitar rate-limit do YouTube
+function randomDelay() {
+    const ms = Math.random() * 3000 + 2000;
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Detecta se o erro é de rate-limit do YouTube
+function isRateLimitError(err) {
+    return err?.stderr?.includes('rate-limited') || err?.stderr?.includes('try again later');
+}
+
+// ─── Rotas ───────────────────────────────────────────────────────────────────
+
+// Validação rápida — o Vue usa para exibir o banner de erro na interface
 app.get('/validate', (req, res) => {
     const url = safeDecodeURL(req.query.url);
 
@@ -58,8 +73,20 @@ app.get('/download', async (req, res) => {
         return res.status(400).json({ error: 'URL inválida ou não informada.' });
     }
 
+    if (!['mp3', 'mp4'].includes(format)) {
+        return res.status(400).json({ error: 'Formato inválido. Use "mp3" ou "mp4".' });
+    }
+
+    // Verifica se cookies.txt existe antes de chamar o yt-dlp
+    if (!fs.existsSync(COOKIES_PATH)) {
+        console.warn('[download] cookies.txt não encontrado em:', COOKIES_PATH);
+        return res.status(500).json({ error: 'Arquivo de autenticação não encontrado no servidor.' });
+    }
+
     try {
-        // ✅ CORREÇÃO: formato com fallback adicionado para evitar crash em vídeos com formatos restritos
+        // Delay para reduzir chance de rate-limit
+        await randomDelay();
+
         const info = await ytdlexec(url, {
             dumpSingleJson: true,
             noWarnings: true,
@@ -117,13 +144,17 @@ app.get('/download', async (req, res) => {
                     res.status(500).json({ error: 'Erro ao processar o vídeo.' });
                 }
             });
-
-        } else {
-            return res.status(400).json({ error: 'Formato inválido. Use "mp3" ou "mp4".' });
         }
 
     } catch (error) {
         console.error('Erro no processamento:', error);
+
+        if (isRateLimitError(error)) {
+            return res.status(429).json({
+                error: 'O servidor foi limitado pelo YouTube temporariamente. Tente novamente em alguns minutos.'
+            });
+        }
+
         res.status(500).json({ error: 'Erro ao processar o download da mídia.' });
     }
 });
