@@ -59,11 +59,13 @@ app.get('/download', async (req, res) => {
     }
 
     try {
+        // ✅ CORREÇÃO: formato com fallback adicionado para evitar crash em vídeos com formatos restritos
         const info = await ytdlexec(url, {
             dumpSingleJson: true,
             noWarnings: true,
             noCheckCertificates: true,
             cookies: COOKIES_PATH,
+            format: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best',
         });
 
         const safeTitle = info.title.replace(/[^\w\s-]/gi, '').trim();
