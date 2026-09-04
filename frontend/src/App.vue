@@ -5,6 +5,7 @@
       <div class="absolute top-0 left-0 right-0 h-0.75 bg-linear-to-r from-orange-600 to-amber-500"></div>
       
       <header class="text-center mb-8">
+        <p class="font-mono italic text-red-400">FORA DO AR</p>
         <h1 class="text-4xl font-black tracking-wider text-neutral-50 flex items-center justify-center gap-2">
           <span class="font-mono italic">HYPER</span><span class="text-orange-500 font-mono italic">SAVE</span>
         </h1>
