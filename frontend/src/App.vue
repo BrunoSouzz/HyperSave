@@ -6,7 +6,7 @@
     <main class="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-5 py-10 sm:px-8">
       <nav class="mb-12 flex items-center justify-between">
         <a href="#" class="flex items-center gap-2.5" aria-label="HyperSave início">
-          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500 text-lg font-black text-neutral-950 shadow-lg shadow-orange-500/20">H</span>
+          <img src="/hypersave-logo.svg" alt="" class="h-10 w-10 rounded-xl shadow-lg shadow-orange-500/20" />
           <span class="text-lg font-black tracking-tight">HYPER<span class="text-orange-500">SAVE</span></span>
         </a>
         <div class="flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/5 px-3 py-1.5 text-xs font-medium text-emerald-300">
