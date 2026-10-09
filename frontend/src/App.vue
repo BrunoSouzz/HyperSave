@@ -157,7 +157,7 @@ const handleDownload = async () => {
   loading.value = true;
   errorMessage.value = ''; 
 
-  const apiBaseUrl = 'https://hypersaveapi-production-1ebc.up.railway.app';
+  const apiBaseUrl = 'https://hypersaveapi-production.up.railway.app';
 
   try {
     
