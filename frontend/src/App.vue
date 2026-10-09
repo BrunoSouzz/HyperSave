@@ -117,18 +117,23 @@
           :disabled="loading"
           class="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 py-3.5 text-sm font-black uppercase tracking-wider text-neutral-950 shadow-lg shadow-orange-500/10 transition-all duration-200 hover:bg-orange-400 active:scale-[0.99] disabled:transform-none disabled:opacity-40"
         >
-          <span v-if="loading" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-neutral-950 border-t-transparent"></span>
+          <span v-if="loading" class="h-1.5 w-8 overflow-hidden rounded-full bg-neutral-950/20">
+            <span class="loading-bar block h-full w-1/2 rounded-full bg-neutral-950"></span>
+          </span>
           <span>{{ loading ? 'Processando...' : 'Baixar agora' }}</span>
         </button>
       </form>
 
       <transition name="fade">
-        <div v-if="loading" class="mt-4 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 p-3 text-xs font-medium text-orange-400/90">
-          <span class="flex h-2 w-2 relative">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-          </span>
-          Isso pode levar alguns segundos dependendo do tamanho do arquivo.
+        <div v-if="loading" class="mt-4 rounded-xl border border-white/10 bg-neutral-950 p-4 text-xs font-medium text-orange-400/90" role="status" aria-live="polite">
+          <div class="mb-2 flex items-center justify-between gap-3">
+            <span>Preparando seu arquivo...</span>
+            <span class="text-[10px] uppercase tracking-wider text-neutral-600">Aguarde</span>
+          </div>
+          <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label="Download em andamento">
+            <div class="loading-bar h-full w-2/5 rounded-full bg-linear-to-r from-orange-500 to-amber-300"></div>
+          </div>
+          <p class="mt-2 text-[11px] font-normal text-neutral-600">O tempo pode variar conforme o tamanho do arquivo.</p>
         </div>
       </transition>
           </div>
@@ -213,6 +218,20 @@ const handleDownload = async () => {
 </script>
 
 <style scoped>
+.loading-bar {
+  animation: loading-progress 1.8s ease-in-out infinite;
+}
+
+@keyframes loading-progress {
+  0% {
+    transform: translateX(-160%);
+  }
+
+  100% {
+    transform: translateX(280%);
+  }
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
